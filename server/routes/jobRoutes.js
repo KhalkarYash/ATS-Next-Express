@@ -6,6 +6,7 @@ const {
   getJobDetails,
   editJobPost,
   deleteJobPost,
+  getJobStats
 } = require("../controllers/jobController");
 const auth = require("../middleware/auth");
 
@@ -14,6 +15,9 @@ router.post("/", auth, createJobPost);
 
 // Get all jobs with filters
 router.get("/", getJobs);
+
+// Get job statistics (Admin only)
+router.get("/stats", auth, getJobStats);
 
 // Get job details by ID
 router.get("/:id", getJobDetails);
