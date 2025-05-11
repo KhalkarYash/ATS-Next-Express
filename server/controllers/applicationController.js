@@ -127,7 +127,7 @@ const deleteApplication = async (req, res) => {
         .json({ message: "Not authorized to delete this application" });
     }
 
-    await application.remove();
+    await application.deleteOne();
     res.status(200).json({ message: "Application deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });

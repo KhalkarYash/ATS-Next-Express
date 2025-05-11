@@ -70,7 +70,7 @@ const getAllUsers = async (req, res) => {
 
         const query = {};
         const sort = {};
-        sort[sortBy] = sortOrder;
+        sort[sortBy] = parseInt(sortOrder, 10); // Convert sortOrder to a number
 
         if (role) {
             query.role = role;

@@ -40,7 +40,7 @@ const loginUser = async (req, res) => {
     return res.status(400).json({ message: "Invalid credentials" });
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
+  const isMatch = await user.matchPassword(password);
   if (!isMatch) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
@@ -61,7 +61,7 @@ const logoutUser = async (req, res) => {
     // 1. Add the token to a blacklist in Redis/DB
     // 2. Clear any server-side sessions
     // 3. Clear any httpOnly cookies if using them
-    
+
     res.json({ message: "Logged out successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -101,7 +101,7 @@ const deleteUserAccount = async (req, res) => {
     return res.status(404).json({ message: "User not found" });
   }
 
-  await user.remove();
+  await user.deleteOne();
   res.json({ message: "User account deleted" });
 };
 
