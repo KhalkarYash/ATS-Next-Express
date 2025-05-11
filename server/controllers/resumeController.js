@@ -13,6 +13,31 @@ const uploadResume = async (req, res) => {
         const fileBuffer = await fs.readFile(req.file.path);
         const parsedData = await parseResume(fileBuffer);
 
+        // Check if user already has a resume
+        const existingResume = await Resume.findOne({ uploadedBy: req.user.id });
+
+        if (existingResume) {
+            // Delete the old file
+            try {
+                await fs.unlink(existingResume.path);
+            } catch (err) {
+                console.error('Error deleting old resume file:', err);
+            }
+
+            // Update existing resume
+            existingResume.filename = req.file.originalname;
+            existingResume.path = req.file.path;
+            existingResume.parsedContent = {
+                skills: parsedData.skills,
+                education: parsedData.education,
+                rawText: parsedData.rawText
+            };
+
+            await existingResume.save();
+            return res.status(200).json(existingResume);
+        }
+
+        // Create new resume if user doesn't have one
         const resume = new Resume({
             filename: req.file.originalname,
             path: req.file.path,
