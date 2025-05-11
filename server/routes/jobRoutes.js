@@ -19,7 +19,7 @@ router.get("/", getJobs);
 // Get job statistics (Admin only)
 router.get("/stats", auth, getJobStats);
 
-// Get job details by ID
+// Get job details by ID (must come after other GET routes)
 router.get("/:id", getJobDetails);
 
 // Edit a job post (Admin only)

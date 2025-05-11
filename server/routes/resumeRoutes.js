@@ -31,10 +31,10 @@ const upload = multer({
 // Upload a resume
 router.post("/", auth, upload.single("resume"), uploadResume);
 
-// View a resume
-router.get("/:id", auth, viewResume);
-
 // Search resumes (HR/Admin only)
 router.get("/search", auth, searchResumes);
+
+// View a resume
+router.get("/:id", auth, viewResume);
 
 module.exports = router;

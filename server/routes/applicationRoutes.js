@@ -19,7 +19,7 @@ router.get("/", auth, getApplications);
 // Get logged-in user's applications
 router.get("/my-applications", auth, getMyApplications);
 
-// Get details of a specific application
+// Get details of a specific application (must come after other GET routes)
 router.get("/:id", auth, getApplicationDetails);
 
 // Update application status (HR/Admin)

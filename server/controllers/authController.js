@@ -54,6 +54,20 @@ const loginUser = async (req, res) => {
   res.json({ message: "Login successful", token });
 };
 
+// Logout User
+const logoutUser = async (req, res) => {
+  try {
+    // In a real-world application, you might want to:
+    // 1. Add the token to a blacklist in Redis/DB
+    // 2. Clear any server-side sessions
+    // 3. Clear any httpOnly cookies if using them
+    
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Get Current Logged-in User
 const getCurrentUser = async (req, res) => {
   const user = await User.findById(req.user.id).select("-password");
@@ -94,6 +108,7 @@ const deleteUserAccount = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   getCurrentUser,
   updateUserProfile,
   deleteUserAccount,
