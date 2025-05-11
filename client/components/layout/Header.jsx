@@ -1,26 +1,47 @@
-"use client"
+"use client";
 
-import { Fragment } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
-import { Disclosure, Menu, Transition } from "@headlessui/react"
-import { Bell, MenuIcon, User } from "lucide-react"
-import { logout } from "@/utils/auth"
+import { Fragment } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Disclosure, Menu, Transition } from "@headlessui/react";
+import { Bell, MenuIcon, User } from "lucide-react";
+import { logout } from "../../utils/auth";
 
-export default function Header({ authenticated, userRole, sidebarOpen, setSidebarOpen }) {
-  const router = useRouter()
+export default function Header({
+  authenticated,
+  userRole,
+  sidebarOpen,
+  setSidebarOpen,
+}) {
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
       await logout();
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      console.error('Logout failed:', error);
+      console.error("Logout failed:", error);
     }
   };
 
+  const menuItems = [
+    { name: "Home", href: "/" },
+    { name: "Jobs", href: "/jobs" },
+    ...(authenticated
+      ? [{ name: "My Applications", href: "/applications" }]
+      : []),
+    ...(userRole === "admin" || userRole === "hr"
+      ? [{ name: "Admin", href: "/admin" }]
+      : []),
+  ];
+
+  const profileDropdownItems = [
+    { name: "Dashboard", href: "/dashboard" },
+    { name: "Profile Settings", href: "/profile" },
+  ];
+
   return (
-    <Disclosure as="nav" className="bg-white shadow-sm">
+    <Disclosure as="nav" className="bg-background border-b border-border">
       {({ open }) => (
         <>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,7 +50,7 @@ export default function Header({ authenticated, userRole, sidebarOpen, setSideba
                 {authenticated && (
                   <button
                     type="button"
-                    className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+                    className="md:hidden -ml-0.5 -mt-0.5 h-12 w-12 inline-flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary transition-colors duration-200"
                     onClick={() => setSidebarOpen(true)}
                   >
                     <span className="sr-only">Open sidebar</span>
@@ -37,76 +58,47 @@ export default function Header({ authenticated, userRole, sidebarOpen, setSideba
                   </button>
                 )}
                 <div className="flex-shrink-0 flex items-center">
-                  <Link href="/" className="text-xl font-bold text-blue-600">
+                  <Link
+                    href="/"
+                    className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent"
+                  >
                     ATS System
                   </Link>
                 </div>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                  <Link
-                    href="/"
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                      router.pathname && router.pathname === "/" // Added null check
-                        ? "border-blue-500 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    }`}
-                  >
-                    Home
-                  </Link>
-                  <Link
-                    href="/jobs"
-                    className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                      router.pathname && router.pathname.startsWith("/jobs") // Added null check
-                        ? "border-blue-500 text-gray-900"
-                        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                    }`}
-                  >
-                    Jobs
-                  </Link>
-                  {authenticated && (
-                    <>
-                      <Link
-                        href="/applications"
-                        className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                          router.pathname && router.pathname.startsWith("/applications") // Added null check
-                            ? "border-blue-500 text-gray-900"
-                            : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                        }`}
-                      >
-                        My Applications
-                      </Link>
-                      {(userRole === "admin" || userRole === "hr") && (
-                        <Link
-                          href="/admin"
-                          className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                            router.pathname && router.pathname.startsWith("/admin") // Added null check
-                              ? "border-blue-500 text-gray-900"
-                              : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                          }`}
-                        >
-                          Admin
-                        </Link>
-                      )}
-                    </>
-                  )}
+                  {menuItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200 ${
+                        router.pathname === item.href ||
+                        router.pathname?.startsWith(item.href + "/")
+                          ? "border-primary text-foreground"
+                          : "border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+                      }`}
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
                 </div>
               </div>
+
               <div className="flex items-center">
                 {authenticated ? (
                   <div className="hidden sm:ml-6 sm:flex sm:items-center">
                     <button
                       type="button"
-                      className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="bg-background p-1 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
                     >
                       <span className="sr-only">View notifications</span>
                       <Bell className="h-6 w-6" aria-hidden="true" />
                     </button>
 
-                    {/* Profile dropdown */}
                     <Menu as="div" className="ml-3 relative">
                       <div>
-                        <Menu.Button className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <Menu.Button className="bg-background rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-shadow duration-200">
                           <span className="sr-only">Open user menu</span>
-                          <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                          <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                             <User className="h-5 w-5" />
                           </div>
                         </Menu.Button>
@@ -120,34 +112,28 @@ export default function Header({ authenticated, userRole, sidebarOpen, setSideba
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
-                          <Menu.Item>
-                            {({ active }) => (
-                              <Link
-                                href="/dashboard"
-                                className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
-                              >
-                                Dashboard
-                              </Link>
-                            )}
-                          </Menu.Item>
-                          <Menu.Item>
-                            {({ active }) => (
-                              <Link
-                                href="/profile"
-                                className={`${active ? "bg-gray-100" : ""} block px-4 py-2 text-sm text-gray-700`}
-                              >
-                                Profile Settings
-                              </Link>
-                            )}
-                          </Menu.Item>
+                        <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-background border border-border focus:outline-none">
+                          {profileDropdownItems.map((item) => (
+                            <Menu.Item key={item.name}>
+                              {({ active }) => (
+                                <Link
+                                  href={item.href}
+                                  className={`${
+                                    active ? "bg-accent" : ""
+                                  } block px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors duration-150`}
+                                >
+                                  {item.name}
+                                </Link>
+                              )}
+                            </Menu.Item>
+                          ))}
                           <Menu.Item>
                             {({ active }) => (
                               <button
                                 onClick={handleLogout}
                                 className={`${
-                                  active ? "bg-gray-100" : ""
-                                } block w-full text-left px-4 py-2 text-sm text-gray-700`}
+                                  active ? "bg-accent" : ""
+                                } block w-full text-left px-4 py-2 text-sm text-foreground hover:bg-accent transition-colors duration-150`}
                               >
                                 Sign out
                               </button>
@@ -159,12 +145,15 @@ export default function Header({ authenticated, userRole, sidebarOpen, setSideba
                   </div>
                 ) : (
                   <div className="flex items-center space-x-4">
-                    <Link href="/login" className="text-gray-500 hover:text-gray-700 text-sm font-medium">
+                    <Link
+                      href="/login"
+                      className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors duration-150"
+                    >
                       Sign in
                     </Link>
                     <Link
                       href="/register"
-                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
                     >
                       Sign up
                     </Link>
@@ -176,100 +165,64 @@ export default function Header({ authenticated, userRole, sidebarOpen, setSideba
 
           <Disclosure.Panel className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
-              <Disclosure.Button
-                as={Link}
-                href="/"
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                  router.pathname && router.pathname === "/" // Added null check
-                    ? "bg-blue-50 border-blue-500 text-blue-700"
-                    : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-                }`}
-              >
-                Home
-              </Disclosure.Button>
-              <Disclosure.Button
-                as={Link}
-                href="/jobs"
-                className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                  router.pathname && router.pathname.startsWith("/jobs") // Added null check
-                    ? "bg-blue-50 border-blue-500 text-blue-700"
-                    : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-                }`}
-              >
-                Jobs
-              </Disclosure.Button>
-              {authenticated && (
-                <>
-                  <Disclosure.Button
-                    as={Link}
-                    href="/applications"
-                    className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                      router.pathname && router.pathname.startsWith("/applications") // Added null check
-                        ? "bg-blue-50 border-blue-500 text-blue-700"
-                        : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-                    }`}
-                  >
-                    My Applications
-                  </Disclosure.Button>
-                  {(userRole === "admin" || userRole === "hr") && (
-                    <Disclosure.Button
-                      as={Link}
-                      href="/admin"
-                      className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium ${
-                        router.pathname && router.pathname.startsWith("/admin") // Added null check
-                          ? "bg-blue-50 border-blue-500 text-blue-700"
-                          : "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-                      }`}
-                    >
-                      Admin
-                    </Disclosure.Button>
-                  )}
-                </>
-              )}
+              {menuItems.map((item) => (
+                <Disclosure.Button
+                  key={item.name}
+                  as={Link}
+                  href={item.href}
+                  className={`block pl-3 pr-4 py-2 border-l-4 text-base font-medium transition-colors duration-150 ${
+                    router.pathname === item.href ||
+                    router.pathname?.startsWith(item.href + "/")
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-transparent text-muted-foreground hover:bg-accent hover:border-border hover:text-foreground"
+                  }`}
+                >
+                  {item.name}
+                </Disclosure.Button>
+              ))}
             </div>
+
             {authenticated && (
-              <div className="pt-4 pb-3 border-t border-gray-200">
+              <div className="pt-4 pb-3 border-t border-border">
                 <div className="flex items-center px-4">
                   <div className="flex-shrink-0">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                       <User className="h-6 w-6" />
                     </div>
                   </div>
                   <div className="ml-3">
-                    <div className="text-base font-medium text-gray-800">
-                      {JSON.parse(localStorage.getItem("userData") || "{}").name || "User"}
+                    <div className="text-base font-medium text-foreground">
+                      {JSON.parse(localStorage.getItem("userData") || "{}")
+                        .name || "User"}
                     </div>
-                    <div className="text-sm font-medium text-gray-500">
-                      {JSON.parse(localStorage.getItem("userData") || "{}").email || ""}
+                    <div className="text-sm font-medium text-muted-foreground">
+                      {JSON.parse(localStorage.getItem("userData") || "{}")
+                        .email || ""}
                     </div>
                   </div>
                   <button
                     type="button"
-                    className="ml-auto flex-shrink-0 bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="ml-auto flex-shrink-0 bg-background p-1 rounded-full text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors duration-200"
                   >
                     <span className="sr-only">View notifications</span>
                     <Bell className="h-6 w-6" aria-hidden="true" />
                   </button>
                 </div>
                 <div className="mt-3 space-y-1">
-                  <Disclosure.Button
-                    as={Link}
-                    href="/dashboard"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                  >
-                    Dashboard
-                  </Disclosure.Button>
-                  <Disclosure.Button
-                    as={Link}
-                    href="/profile"
-                    className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
-                  >
-                    Profile Settings
-                  </Disclosure.Button>
+                  {profileDropdownItems.map((item) => (
+                    <Disclosure.Button
+                      key={item.name}
+                      as={Link}
+                      href={item.href}
+                      className="block px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors duration-150"
+                    >
+                      {item.name}
+                    </Disclosure.Button>
+                  ))}
                   <Disclosure.Button
                     as="button"
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100"
+                    className="block w-full text-left px-4 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-accent transition-colors duration-150"
                   >
                     Sign out
                   </Disclosure.Button>
@@ -280,5 +233,5 @@ export default function Header({ authenticated, userRole, sidebarOpen, setSideba
         </>
       )}
     </Disclosure>
-  )
+  );
 }

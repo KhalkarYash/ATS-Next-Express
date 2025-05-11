@@ -1,13 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import dynamic from 'next/dynamic';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
-import Layout from "@/components/layout/Layout";
-import JobCard from "@/components/jobs/JobCard";
-import SearchBar from "@/components/ui/SearchBar";
-import Pagination from "@/components/ui/pagination";
-import { fetchJobs } from "@/utils/api";
-import { isAuthenticated } from "@/utils/auth";
+import Layout from "../components/layout/Layout";
+import LoadingSpinner from "../components/ui/loading-spinner";
+import { fetchJobs } from "../utils/api";
+import { isAuthenticated } from "../utils/auth";
+
+// Dynamic imports for optimized loading
+const JobCard = dynamic(() => import("../components/jobs/JobCard"), {
+  loading: () => <LoadingSpinner />
+});
+
+const SearchBar = dynamic(() => import("../components/ui/SearchBar"), {
+  ssr: false
+});
+
+const Pagination = dynamic(() => import("../components/ui/pagination"), {
+  loading: () => <div className="h-10 animate-pulse bg-gray-100 rounded" />
+});
 
 export default function Home() {
   const router = useRouter();
@@ -74,10 +86,12 @@ export default function Home() {
         </div>
 
         <div className="mb-8">
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder="Search for jobs by title, skills, or keywords"
-          />
+          <Suspense fallback={<LoadingSpinner />}>
+            <SearchBar
+              onSearch={handleSearch}
+              placeholder="Search for jobs by title, skills, or keywords"
+            />
+          </Suspense>
 
           <div className="mt-4 flex flex-wrap gap-2">
             <select
@@ -133,18 +147,22 @@ export default function Home() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <Suspense key={job.id} fallback={<div className="h-64 animate-pulse bg-gray-100 rounded-lg" />}>
+                <JobCard job={job} />
+              </Suspense>
             ))}
           </div>
         )}
 
         {!loading && jobs.length > 0 && (
           <div className="mt-10">
-            <Pagination
-              currentPage={page}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+            <Suspense fallback={<div className="h-10 animate-pulse bg-gray-100 rounded" />}>
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            </Suspense>
           </div>
         )}
 
