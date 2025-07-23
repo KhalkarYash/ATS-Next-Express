@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: ats-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    networks:
+      - ats-network
+
+  server:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: ats-server
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://admin:password@mongodb:27017/ats_database?authSource=admin
+      - JWT_SECRET=ats_super_secret_jwt_key_2024_production_environment_minimum_32_characters
+      - CLIENT_URL=http://localhost:3000
+      - NODE_ENV=production
+      - MAX_FILE_SIZE=10485760
+      - UPLOAD_PATH=./uploads
+    volumes:
+      - ./server/uploads:/app/uploads
+    networks:
+      - ats-network
+
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: ats-client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - server
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5000/api
+      - NEXT_PUBLIC_CLIENT_URL=http://localhost:3000
+      - NODE_ENV=production
+    networks:
+      - ats-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  ats-network:
+    driver: bridge
