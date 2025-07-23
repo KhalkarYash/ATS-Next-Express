@@ -1,7 +1,7 @@
 "use client";
 
-import dynamic from 'next/dynamic';
-import { Suspense, useEffect, useState } from 'react';
+import dynamic from "next/dynamic";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../components/layout/Layout";
 import LoadingSpinner from "../components/ui/loading-spinner";
@@ -10,16 +10,19 @@ import { isAuthenticated } from "../utils/auth";
 
 // Dynamic imports for optimized loading
 const JobCard = dynamic(() => import("../components/jobs/JobCard"), {
-  loading: () => <LoadingSpinner />
+  loading: () => <LoadingSpinner />,
 });
 
 const SearchBar = dynamic(() => import("../components/ui/SearchBar"), {
-  ssr: false
+  ssr: false,
 });
 
-const Pagination = dynamic(() => import("../components/ui/pagination"), {
-  loading: () => <div className="h-10 animate-pulse bg-gray-100 rounded" />
-});
+const Pagination = dynamic(
+  () => import("../components/ui/pagination").then((mod) => mod.Pagination),
+  {
+    loading: () => <div className="h-10 animate-pulse bg-gray-100 rounded" />,
+  }
+);
 
 export default function Home() {
   const router = useRouter();
@@ -147,7 +150,12 @@ export default function Home() {
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {jobs.map((job) => (
-              <Suspense key={job.id} fallback={<div className="h-64 animate-pulse bg-gray-100 rounded-lg" />}>
+              <Suspense
+                key={job.id}
+                fallback={
+                  <div className="h-64 animate-pulse bg-gray-100 rounded-lg" />
+                }
+              >
                 <JobCard job={job} />
               </Suspense>
             ))}
@@ -156,7 +164,11 @@ export default function Home() {
 
         {!loading && jobs.length > 0 && (
           <div className="mt-10">
-            <Suspense fallback={<div className="h-10 animate-pulse bg-gray-100 rounded" />}>
+            <Suspense
+              fallback={
+                <div className="h-10 animate-pulse bg-gray-100 rounded" />
+              }
+            >
               <Pagination
                 currentPage={page}
                 totalPages={totalPages}

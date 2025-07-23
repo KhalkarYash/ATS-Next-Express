@@ -1,17 +1,22 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Layout from "@/components/layout/Layout"
 import JobCard from "@/components/jobs/JobCard"
 import SearchBar from "@/components/ui/SearchBar"
-import Pagination from "@/components/ui/Pagination"
+import { Pagination } from "@/components/ui/Pagination"
 import { fetchJobs } from "@/utils/api"
 import { isAuthenticated } from "@/utils/auth"
 
 export default function Jobs() {
   const router = useRouter()
-  const { search, location, department, type, page: pageQuery } = router.query
+  const searchParams = useSearchParams()
+  const pageQuery = searchParams.get('page')
+  const search = searchParams.get('search')
+  const location = searchParams.get('location')
+  const department = searchParams.get('department')
+  const type = searchParams.get('type')
 
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,22 +32,14 @@ export default function Jobs() {
 
   useEffect(() => {
     // Update URL with current filters and pagination
-    const query = {
-      ...(filters.search && { search: filters.search }),
-      ...(filters.location && { location: filters.location }),
-      ...(filters.department && { department: filters.department }),
-      ...(filters.type && { type: filters.type }),
-      ...(page > 1 && { page }),
-    }
+    const query = new URLSearchParams()
+    if (filters.search) query.set('search', filters.search)
+    if (filters.location) query.set('location', filters.location)
+    if (filters.department) query.set('department', filters.department)
+    if (filters.type) query.set('type', filters.type)
+    if (page > 1) query.set('page', page.toString())
 
-    router.push(
-      {
-        pathname: "/jobs",
-        query,
-      },
-      undefined,
-      { shallow: true },
-    )
+    router.push(`/jobs?${query.toString()}`)
 
     const loadJobs = async () => {
       try {

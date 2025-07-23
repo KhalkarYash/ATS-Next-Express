@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Layout from "@/components/layout/Layout"
 import SearchBar from "@/components/ui/SearchBar"
@@ -12,7 +12,11 @@ import { AlertCircle } from "lucide-react"
 
 export default function AdminApplications() {
   const router = useRouter()
-  const { page: pageQuery, status, jobId, search } = router.query
+  const searchParams = useSearchParams()
+  const pageQuery = searchParams.get('page')
+  const status = searchParams.get('status')
+  const jobId = searchParams.get('jobId')
+  const search = searchParams.get('search')
 
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)
@@ -27,21 +31,13 @@ export default function AdminApplications() {
 
   useEffect(() => {
     // Update URL with current filters and pagination
-    const query = {
-      ...(filters.status && { status: filters.status }),
-      ...(filters.jobId && { jobId: filters.jobId }),
-      ...(filters.search && { search: filters.search }),
-      ...(page > 1 && { page }),
-    }
+    const query = new URLSearchParams()
+    if (filters.status) query.set('status', filters.status)
+    if (filters.jobId) query.set('jobId', filters.jobId)
+    if (filters.search) query.set('search', filters.search)
+    if (page > 1) query.set('page', page.toString())
 
-    router.push(
-      {
-        pathname: "/admin/applications",
-        query,
-      },
-      undefined,
-      { shallow: true },
-    )
+    router.push(`/admin/applications?${query.toString()}`)
 
     const loadApplications = async () => {
       try {

@@ -1,17 +1,17 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Layout from "@/components/layout/Layout"
 import { fetchJobById } from "@/utils/api"
 import { isAuthenticated } from "@/utils/auth"
 import { formatDate } from "@/utils/helpers"
 import { Briefcase, MapPin, Calendar, Clock, Building, DollarSign } from "lucide-react"
 
-export default function JobDetails() {
+export default function JobDetailsPage() {
   const router = useRouter()
-  const { id } = router.query
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id')
 
   const [job, setJob] = useState(null)
   const [loading, setLoading] = useState(true)

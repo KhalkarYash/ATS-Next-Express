@@ -1,3 +1,5 @@
+const { API_BASE_URL } = require('./utils/api');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -10,6 +12,14 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: API_BASE_URL + '/api/:path*',
+      },
+    ];
   },
 }
 

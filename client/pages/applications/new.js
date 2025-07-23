@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Layout from "@/components/layout/Layout"
 import ResumeUpload from "@/components/resume/ResumeUpload"
@@ -11,7 +11,8 @@ import { AlertCircle } from "lucide-react"
 
 export default function NewApplication() {
   const router = useRouter()
-  const { jobId } = router.query
+  const searchParams = useSearchParams()
+  const jobId = searchParams.get('jobId')
 
   const [job, setJob] = useState(null)
   const [formData, setFormData] = useState({

@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Layout from "@/components/layout/Layout"
 import { fetchJobById, updateJob } from "@/utils/api"
@@ -9,7 +9,8 @@ import { AlertCircle } from "lucide-react"
 
 export default function EditJob() {
   const router = useRouter()
-  const { id } = router.query
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id')
 
   const [formData, setFormData] = useState({
     title: "",

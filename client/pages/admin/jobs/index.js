@@ -1,18 +1,20 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Layout from "@/components/layout/Layout"
 import SearchBar from "@/components/ui/SearchBar"
-import Pagination from "@/components/ui/Pagination"
+import { Pagination } from "@/components/ui/Pagination"
 import { fetchJobs, deleteJob } from "@/utils/api"
 import { formatDate } from "@/utils/helpers"
 import { AlertCircle, Edit, Trash2, Plus, Eye } from "lucide-react"
 
 export default function AdminJobs() {
   const router = useRouter()
-  const { page: pageQuery, search } = router.query
+  const searchParams = useSearchParams()
+  const pageQuery = searchParams.get('page')
+  const search = searchParams.get('search')
 
   const [jobs, setJobs] = useState([])
   const [loading, setLoading] = useState(true)
@@ -24,19 +26,11 @@ export default function AdminJobs() {
 
   useEffect(() => {
     // Update URL with current search and pagination
-    const query = {
-      ...(searchTerm && { search: searchTerm }),
-      ...(page > 1 && { page }),
-    }
+    const query = new URLSearchParams()
+    if (searchTerm) query.set('search', searchTerm)
+    if (page > 1) query.set('page', page.toString())
 
-    router.push(
-      {
-        pathname: "/admin/jobs",
-        query,
-      },
-      undefined,
-      { shallow: true },
-    )
+    router.push(`/admin/jobs?${query.toString()}`)
 
     const loadJobs = async () => {
       try {

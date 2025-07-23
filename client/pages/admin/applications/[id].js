@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import Layout from "@/components/layout/Layout"
 import ApplicationStatus from "@/components/applications/ApplicationStatus"
@@ -13,7 +13,8 @@ import { AlertCircle, FileText, Calendar, Clock } from "lucide-react"
 
 export default function AdminApplicationDetails() {
   const router = useRouter()
-  const { id } = router.query
+  const searchParams = useSearchParams()
+  const id = searchParams.get('id')
 
   const [application, setApplication] = useState(null)
   const [loading, setLoading] = useState(true)

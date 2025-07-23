@@ -1,31 +1,46 @@
 // Authentication utilities
-import { logout as apiLogout } from './api';
+import { API_BASE_URL, logout as apiLogout } from "./api";
 
 // Token refresh threshold (5 minutes before expiry)
 const REFRESH_THRESHOLD = 5 * 60 * 1000;
 
-export const getAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
+// Safe localStorage access
+const getLocalStorage = (key, defaultValue = null) => {
+  if (typeof window === "undefined") return defaultValue;
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : defaultValue;
+  } catch (error) {
+    console.error(`Error accessing localStorage for key ${key}:`, error);
+    return defaultValue;
   }
-  return null;
+};
+
+const setLocalStorage = (key, value) => {
+  try {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error setting localStorage for key ${key}:`, error);
+  }
+};
+
+export const getAuthToken = () => {
+  return typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
 };
 
 export const getUserData = () => {
-  if (typeof window !== 'undefined') {
-    const userData = localStorage.getItem('userData');
-    return userData ? JSON.parse(userData) : null;
-  }
-  return null;
+  return getLocalStorage("userData", null);
 };
 
 // Parse JWT token without external library
 const parseJwt = (token) => {
   try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     return JSON.parse(window.atob(base64));
   } catch (error) {
+    console.error("Error parsing JWT:", error);
     return null;
   }
 };
@@ -37,7 +52,7 @@ const shouldRefreshToken = (token) => {
 
   const expiryTime = decoded.exp * 1000; // Convert to milliseconds
   const currentTime = Date.now();
-  
+
   return expiryTime - currentTime < REFRESH_THRESHOLD;
 };
 
@@ -63,7 +78,7 @@ export const getUserRole = () => {
 // Login function
 export const login = async (email, password) => {
   try {
-    const response = await fetch("/api/auth/login", {
+    const response = await fetch(API_BASE_URL + "/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -77,10 +92,10 @@ export const login = async (email, password) => {
     }
 
     const data = await response.json();
-    
+
     // Store token and user data in localStorage
     localStorage.setItem("authToken", data.token);
-    localStorage.setItem("userData", JSON.stringify(data.user));
+    setLocalStorage("userData", data.user);
 
     // Set up storage event listener for cross-tab authentication
     setupAuthListener();
@@ -95,7 +110,7 @@ export const login = async (email, password) => {
 // Register function
 export const register = async (userData) => {
   try {
-    const response = await fetch("/api/auth/register", {
+    const response = await fetch(API_BASE_URL + "/api/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -120,28 +135,28 @@ export const logout = async () => {
   try {
     await apiLogout();
   } catch (error) {
-    console.error('Logout failed:', error);
+    console.error("Logout failed:", error);
   } finally {
     // Clear authentication data
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('userData');
-    
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
+
     // Broadcast logout to other tabs
-    localStorage.setItem('auth_event', 'logout');
-    localStorage.removeItem('auth_event');
-    
+    localStorage.setItem("auth_event", "logout");
+    localStorage.removeItem("auth_event");
+
     // Force reload to clear any in-memory state
-    window.location.href = '/login';
+    window.location.href = "/login";
   }
 };
 
 // Setup cross-tab authentication listener
 export const setupAuthListener = () => {
-  if (typeof window !== 'undefined') {
-    window.addEventListener('storage', (event) => {
-      if (event.key === 'auth_event' && event.newValue === 'logout') {
+  if (typeof window !== "undefined") {
+    window.addEventListener("storage", (event) => {
+      if (event.key === "auth_event" && event.newValue === "logout") {
         // Another tab logged out, sync this tab
-        window.location.href = '/login';
+        window.location.href = "/login";
       }
     });
   }
@@ -155,7 +170,7 @@ export const validateToken = async () => {
   try {
     if (shouldRefreshToken(token)) {
       // Token needs refresh
-      const response = await fetch("/api/auth/refresh", {
+      const response = await fetch(API_BASE_URL + "/api/auth/refresh", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bell, MenuIcon, User } from "lucide-react";
-import { logout } from "../../utils/auth";
+import { logout, getUserData } from "../../utils/auth";
 
 export default function Header({
   authenticated,
@@ -24,6 +24,12 @@ export default function Header({
     }
   };
 
+  const getUserInfo = () => {
+    if (!authenticated) return { name: "User", email: "" };
+    const userData = getUserData();
+    return userData || { name: "User", email: "" };
+  };
+
   const menuItems = [
     { name: "Home", href: "/" },
     { name: "Jobs", href: "/jobs" },
@@ -39,6 +45,9 @@ export default function Header({
     { name: "Dashboard", href: "/dashboard" },
     { name: "Profile Settings", href: "/profile" },
   ];
+
+  // Only call getUserInfo if authenticated to avoid unnecessary localStorage access
+  const userInfo = authenticated ? getUserInfo() : { name: "User", email: "" };
 
   return (
     <Disclosure as="nav" className="bg-background border-b border-border">
@@ -192,12 +201,10 @@ export default function Header({
                   </div>
                   <div className="ml-3">
                     <div className="text-base font-medium text-foreground">
-                      {JSON.parse(localStorage.getItem("userData") || "{}")
-                        .name || "User"}
+                      {userInfo.name}
                     </div>
                     <div className="text-sm font-medium text-muted-foreground">
-                      {JSON.parse(localStorage.getItem("userData") || "{}")
-                        .email || ""}
+                      {userInfo.email}
                     </div>
                   </div>
                   <button
