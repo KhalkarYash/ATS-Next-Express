@@ -2,7 +2,7 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
-export default function Pagination({ currentPage, totalPages, onPageChange }) {
+export function Pagination({ currentPage, totalPages, onPageChange }) {
   // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = []
@@ -87,3 +87,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }) {
     </nav>
   )
 }
+
+// Default export for backward compatibility
+export default Pagination

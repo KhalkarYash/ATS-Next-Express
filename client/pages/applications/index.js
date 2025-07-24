@@ -13,7 +13,7 @@ import { AlertCircle } from "lucide-react"
 
 function ApplicationsPage() {
   const router = useRouter()
-  const { page: pageQuery, status } = router.query
+  const { page: pageQuery, status } = router.query || {}
 
   const [applications, setApplications] = useState([])
   const [loading, setLoading] = useState(true)

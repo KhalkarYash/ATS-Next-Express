@@ -12,7 +12,7 @@ import { AlertCircle, Eye, Edit, Trash2, UserPlus } from "lucide-react"
 
 export default function AdminUsers() {
   const router = useRouter()
-  const { page: pageQuery, search, role } = router.query
+  const { page: pageQuery, search, role } = router.query || {}
 
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)

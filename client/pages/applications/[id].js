@@ -13,7 +13,7 @@ import { AlertCircle, FileText, Calendar, Clock } from "lucide-react"
 
 export default function ApplicationDetails() {
   const router = useRouter()
-  const { id } = router.query
+  const { id } = router.query || {}
 
   const [application, setApplication] = useState(null)
   const [loading, setLoading] = useState(true)
