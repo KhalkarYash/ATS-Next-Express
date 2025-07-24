@@ -1,8 +1,9 @@
 // API client for making requests to the backend
 
 // Base URL for API requests
-export const API_BASE_URL = "http://localhost:5000";
-// export const API_BASE_URL = "https://ats-next-express.onrender.com";
+// export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+// Fallback for production deployment
+export const API_BASE_URL = "https://ats-next-express.onrender.com/api";
 
 // Helper function to get the auth token from localStorage
 const getAuthToken = () => {
